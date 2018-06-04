@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title>Canvas Parallel Coordinates</title>
+    <style type="text/css">
+
+        svg {
+            font: 10px sans-serif;
+        }
+
+        canvas, svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #chart {
+            position: relative;
+        }
+
+        .brush .extent {
+            fill-opacity: .3;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+
+        .axis line, .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            text-shadow: 0 1px 0 #fff;
+        }
+
+        #staging {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="chart">
+    <canvas id="background"></canvas>
+    <canvas id="foreground"></canvas>
+    <canvas id="staging"></canvas>
+    <svg></svg>
+</div>
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+<script type="text/javascript" src="parallel.js"></script>
+</body>
+</html>
