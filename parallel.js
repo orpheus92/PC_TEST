@@ -348,7 +348,7 @@ function draw_area(ctx, d1, d2, tile, color) {
 
                 ctx.lineTo(x(d1), y[d1](tile.mark[0][i]));
 
-                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 2) + ")") : "rgba(0,100,160," + (dense * dd) + ")";
+                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 3) + ")") : "rgba(0,100,160," + (dense * dd) + ")";
 
                 ctx.fill();
             })
@@ -413,7 +413,7 @@ function draw_area2(ctx, d1, d2, tile, dt, color) {
 
                 ctx.lineTo(x(d1), y[d1](tile.mark[0][i]));
 
-                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (100*dense * dd * dt[0][i] * dt[1][j]) + ")";
+                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (10000*dense * dd * dt[0][i] * dt[1][j]) + ")";
 
                 ctx.fill();
             })
@@ -440,7 +440,7 @@ function draw_area2(ctx, d1, d2, tile, dt, color) {
                 ctx.lineTo(x(d1), y[d1](tile.mark[1][i]));
 
                 //let alpha = 2*tile.tile[i][j];
-                let fill = "rgba(0,100,160," + (100*dense * dd * dt[0][i] * dt[1][j]) + ")";
+                let fill = "rgba(0,100,160," + (10000*dense * dd * dt[0][i] * dt[1][j]) + ")";
                 //console.log("Fill = ", fill)
                 ctx.fillStyle = fill;
                 //background.strokeStyle = "rgba(0,0,0,0.02)";
