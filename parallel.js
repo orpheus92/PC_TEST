@@ -34,13 +34,15 @@ var svg = d3.select("svg")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 
-d3.json("multi_tiles_50.json", function (data) {
-        //console.log(data.header)
+d3.json("multi_tiles_50a.json", function (data) {
+        let bin_num = data.tiles[Object.keys(data.tiles)[0]].mark[0].length - 1;
 
         // Extract the list of dimensions and create a scale for each.
         x.domain(dimensions = data.dims.filter(function (d) {
-            //console.log(d);
-            return d != "name" && (y[d] = d3.scale.linear()
+            console.log(data)
+            dense_tiles[d] = Array.from({length: bin_num}, () => 1);
+
+            return (y[d] = d3.scale.linear()
                 .domain(data.range[d])
                 .range([h, 0]));
         }));
@@ -77,7 +79,6 @@ d3.json("multi_tiles_50.json", function (data) {
         g.append("svg:g")
             .attr("class", "brush")
             .each(function (d) {
-                //console.log(d);
                 d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush));
             })
             .selectAll("rect")
@@ -88,56 +89,96 @@ d3.json("multi_tiles_50.json", function (data) {
         // Handles a brush event, toggling the display of foreground lines.
 
         function brush() {
-            console.log("Brushing")
+
             var actives = all_dims.filter(function (p) {
                     return !y[p].brush.empty();
                 }),
                 extents = actives.map(function (p) {
                     return y[p].brush.extent();
                 });
-            //console.log(actives, extents);
-            // Get lines within extents
-            // Need to write this part
-
-            //var selected = [];
-            /*
-            cars.map(function (d) {
-                return actives.every(function (p, i) {
-                    return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-                }) ? selected.push(d) : null;
-            });
-            */
 
             // Render selected lines
             foreground.clearRect(0, 0, w + 1, h + 1);
-            //console.log("Clear Foreground");
-
 
             //console.log("Paths were drawn here");
 
             process_selected(actives, extents);
 
-            draw_selected();
-
-            //selected.map(function (d) {
+            draw_selected(all_dims, foreground, data.tiles);
 
 
-            //area(d, foreground);
-            //});
         }
 
 
         function process_selected(dims, ranges) {
-            console.log(dims, ranges);
 
-            console.log("Get Current selected and dense_tiles");
+            //if (dims.length!=0) {
+                dims.map(function (dim, i) {
 
+                    for (let tile_key in data.tiles) {
+                        let tile = data.tiles[tile_key];
+                        // Find bins for current dim
+                        if ((tile.dim.findIndex(item => item === dim)) > -1) {
+
+                            let cur_mark = tile.mark[tile.dim.findIndex(item => item === dim)];
+
+                            selected[dim] = Array.from({length: bin_num}, (v, j) => {
+
+                                return calc_density(ranges[i], [cur_mark[j], cur_mark[j+1]])
+                            });
+
+                            break;
+
+                        }
+
+                    }
+                });
+
+                // Delete Unselected Ones
+                for (let sdim in selected){
+
+                    if (!dims.includes(sdim)) {
+                        delete selected[sdim];
+                    }
+                }
+
+
+            //console.log(selected);
+            //console.log(data)
+
+
+            calc_densetile(selected, dense_tiles, data.tiles);
+            //console.log("Get Current selected and dense_tiles");
+
+
+            //draw_selected(selected, dense_tiles, dims, foreground, tiles)
         }
 
 
-        function draw_selected(raw, dtile) {
+
+
+        function draw_selected(dims, ctx, tiles, color) {
 
             console.log("Redraw Foreground PC")
+
+            let ind = 0;
+            for (let dim in dims) {
+                if (ind < dims.length - 1) {
+
+                    let dim1 = dims[ind];
+                    let dim2 = dims[ind + 1];
+                    let tile_keys = Object.keys(tiles);
+                    //var t0 = performance.now();
+
+                    if (tile_keys.includes(dim1 + '/' + dim2))
+                        draw_area2(ctx, dim1, dim2, tiles[dim1 + '/' + dim2], [dense_tiles[dim1], dense_tiles[dim2]], color)
+                    else if (tile_keys.includes(dim2 + '/' + dim1))
+                        draw_area2(ctx, dim1, dim2, tiles[dim2 + '/' + dim1], [dense_tiles[dim1], dense_tiles[dim2]], color)
+
+                }
+                ind++;
+            }
+
 
         }
 
@@ -307,7 +348,7 @@ function draw_area(ctx, d1, d2, tile, color) {
 
                 ctx.lineTo(x(d1), y[d1](tile.mark[0][i]));
 
-                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (dense * dd) + ")";
+                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 2) + ")") : "rgba(0,100,160," + (dense * dd) + ")";
 
                 ctx.fill();
             })
@@ -349,4 +390,142 @@ function draw_area(ctx, d1, d2, tile, color) {
 
 };
 
+
+function draw_area2(ctx, d1, d2, tile, dt, color) {
+    console.log(dt);
+    //console.log(d1,d2,tile)
+    let bin_num = tile.tile.length;
+    let color_scale = d3.scale.linear().domain([0, 1500]).range([0, 0.1]);
+    if (d1 === tile.dim[0]) {
+        // row is d1, col is d2
+        //console.log(tile.tile)
+        tile.tile.map(function (d, i) {
+            //console.log("d = ", d);
+            //console.log(i)
+            d.map(function (dd, j) {
+                ctx.beginPath();
+
+                ctx.moveTo(x(d1), y[d1](tile.mark[0][i]));
+                //console.log(x(d1), y[d1](tile.mark[0][i]))
+                ctx.lineTo(x(d2), y[d2](tile.mark[1][j]));
+                ctx.lineTo(x(d2), y[d2](tile.mark[1][j + 1]));
+                ctx.lineTo(x(d1), y[d1](tile.mark[0][i + 1]));
+
+                ctx.lineTo(x(d1), y[d1](tile.mark[0][i]));
+
+                ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (100*dense * dd * dt[0][i] * dt[1][j]) + ")";
+
+                ctx.fill();
+            })
+
+        })
+
+    }
+
+    else {
+        // row is d2, col is d1
+
+        tile.tile.map(function (d, i) {
+            //console.log("d = ", d);
+            //console.log(i)
+            d.map(function (dd, j) {
+                ctx.beginPath();
+
+                ctx.moveTo(x(d1), y[d1](tile.mark[1][i]));
+                //console.log(x(d1), y[d1](tile.mark[0][i]))
+                ctx.lineTo(x(d2), y[d2](tile.mark[0][j]));
+                ctx.lineTo(x(d2), y[d2](tile.mark[0][j + 1]));
+                ctx.lineTo(x(d1), y[d1](tile.mark[1][i + 1]));
+
+                ctx.lineTo(x(d1), y[d1](tile.mark[1][i]));
+
+                //let alpha = 2*tile.tile[i][j];
+                let fill = "rgba(0,100,160," + (100*dense * dd * dt[0][i] * dt[1][j]) + ")";
+                //console.log("Fill = ", fill)
+                ctx.fillStyle = fill;
+                //background.strokeStyle = "rgba(0,0,0,0.02)";
+                ctx.fill();
+            })
+
+        })
+
+
+    }
+
+
+};
+
+
+function calc_density(select_range, cur_block){
+    let [min, max] = cur_block;
+    let [smin,smax] = select_range;
+
+    if (min>smax || max<smin)
+        return 0
+    else if (max>smax)
+        return (min>smin)?(smax-min)/(max-min):(smax-smin)/(max-min);
+    else if (min<smin)
+        return (max<smax)?(max-smin)/(max-min):(smax-smin)/(max-min);
+    else
+        return 1
+}
+
+function calc_densetile(active_sel, dense_t, tiles){
+    //console.log("Compute DensTiles");
+    let cur_tile;
+    let cur_dist;
+    //console.log(active_sel, dense_t, tiles);
+    for(let dim in active_sel){
+
+        for(let dimm in dense_t){
+
+            let tile_keys = Object.keys(tiles);
+
+            if (dim === dimm){
+                //console.log(dense_t[dimm])
+                dense_t[dimm] = active_sel[dim];//dense_t[dimm].map((val,ind)=>{
+                    //console.log(val)
+                    //console.log(active_sel[dim][ind])
+                    //return (val*active_sel[dim][ind])
+                    //return val*2
+                //})
+
+            }
+            else if (tile_keys.includes(dim + '/' + dimm))
+            {
+                cur_tile = tiles[dim + '/' + dimm].tile;
+                cur_dist = cur_tile.reduce((a, b) => {
+
+                    //console.log(a,b);
+
+                    return a.map((x, i) => x + active_sel[dim][i]*b[i])
+
+                })
+                dense_t[dimm] = cur_dist;
+
+
+            }
+
+            else if (tile_keys.includes(dimm + '/' + dim))
+            {
+                cur_tile = tiles[dimm + '/' + dim].tile;
+                cur_dist = cur_tile.map(r => r.reduce((a, b, i) => {
+
+                    //console.log(a)
+                    //console.log(b)
+                    //console.log(i);
+                    return (a + active_sel[dim][i]*b)
+                }));
+                //console.log(cur_dist)
+                dense_t[dimm] = cur_dist;
+
+            }
+            //console.log("Dist", cur_dist);
+
+        }
+
+    }
+    console.log(dense_t)
+
+}
 
