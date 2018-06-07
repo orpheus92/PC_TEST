@@ -11,7 +11,7 @@ let line = d3.svg.line(),
     background,
     foreground,
     dense = 20,
-    opacity = 10
+    opacity = 1
     back_opacty = 0.1;
 
 let selected = {},
@@ -421,7 +421,7 @@ function compute_dist(tiles, active_sel, dim) {
 
                 cur_dist = cur_tile.map(r => r.reduce((a, b, i) => {
                     //console.log("b", b, "i", i, active_sel[active_dim][i])
-                    return (a + active_sel[active_dim][i] * b)
+                    return (a + active_sel[active_dim][i] * b)/(a+b)
                 }),0);
 
                 /*
@@ -439,7 +439,7 @@ function compute_dist(tiles, active_sel, dim) {
 
                 cur_dist = cur_tile.map(r => r.reduce((a, b, i) => {
 
-                    return (a + active_sel[active_dim][i] * b)
+                    return (a + active_sel[active_dim][i] * b)/(a+b)
                 }));
 
 
