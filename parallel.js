@@ -11,7 +11,7 @@ let line = d3.svg.line(),
     background,
     foreground,
     dense = 20,
-    opacity = 1
+    opacity = 1,
     back_opacty = 0.1;
 
 let selected = {},
@@ -33,7 +33,7 @@ var svg = d3.select("svg")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 
-d3.json("multi_tiles_20a.json", function (data) {
+d3.json("multi_tiles_50.json", function (data) {
         let bin_num = data.tiles[Object.keys(data.tiles)[0]].mark[0].length - 1;
 
         // Extract the list of dimensions and create a scale for each.
@@ -50,7 +50,6 @@ d3.json("multi_tiles_20a.json", function (data) {
 
         draw_pc(all_dims, foreground, data.tiles);
         draw_pc(all_dims, background, data.tiles, "rgba(0,0,0,");
-
 
         var g = svg.selectAll(".dimension")
             .data(all_dims)
@@ -71,9 +70,7 @@ d3.json("multi_tiles_20a.json", function (data) {
             .attr("y", -9)
             .text(String);
 
-
         // Add and store a brush for each axis.
-
 
         g.append("svg:g")
             .attr("class", "brush")
@@ -84,25 +81,22 @@ d3.json("multi_tiles_20a.json", function (data) {
             .attr("x", -8)
             .attr("width", 16);
 
-    /*
-    d3.select('#opacity').on('change', () =>{
-        dense = d3.select('#opacity').node().value;
-        //console.log(this);
+        d3.select('#opacity').on('change', () => {
+            dense = d3.select('#opacity').node().value;
 
-    })
+        })
 
-    d3.select('#select_opacity').on('change', () =>{
-        opacity = d3.select('#select_opacity').node().value;
-        //console.log(this);
+        d3.select('#select_opacity').on('change', () => {
+            opacity = d3.select('#select_opacity').node().value;
 
-    })
+        })
 
-    d3.select('#back_opacity').on('change', () =>{
-        back_opacty = d3.select('#back_opacity').node().value;
-        //console.log(this);
+        d3.select('#back_opacity').on('change', () => {
+            back_opacty = d3.select('#back_opacity').node().value;
 
-    })
-    */
+        })
+
+
         // Handles a brush event, toggling the display of foreground lines.
 
         function brush() {
@@ -121,13 +115,12 @@ d3.json("multi_tiles_20a.json", function (data) {
 
             process_selected(actives, extents);
 
-            if (Object.keys(selected).length != 0)
-            {foreground.clearRect(0, 0, w + 1, h + 1);
+            if (Object.keys(selected).length != 0) {
+                foreground.clearRect(0, 0, w + 1, h + 1);
                 draw_selected(all_dims, foreground, data.tiles);
             }
-            else
-
-            {foreground.clearRect(0, 0, w + 1, h + 1);
+            else {
+                foreground.clearRect(0, 0, w + 1, h + 1);
                 draw_pc(all_dims, foreground, data.tiles);
             }
 
@@ -165,14 +158,10 @@ d3.json("multi_tiles_20a.json", function (data) {
                     delete selected[sdim];
                 }
             }
-
             calc_densetile(selected, dense_tiles, data.tiles);
         }
 
-
         function draw_selected(dims, ctx, tiles, color) {
-
-            //console.log("Redraw Foreground PC")
 
             let ind = 0;
             for (let dim in dims) {
@@ -184,7 +173,6 @@ d3.json("multi_tiles_20a.json", function (data) {
                     //var t0 = performance.now();
 
 
-
                     if (tile_keys.includes(dim1 + '/' + dim2))
                         draw_area2(ctx, dim1, dim2, tiles[dim1 + '/' + dim2], [dense_tiles[dim1], dense_tiles[dim2]], selected, color)
                     else if (tile_keys.includes(dim2 + '/' + dim1))
@@ -194,10 +182,7 @@ d3.json("multi_tiles_20a.json", function (data) {
                 ind++;
             }
 
-
         }
-        //console.log(d3.select('#opacity'));
-
     }
 )
 
@@ -286,38 +271,25 @@ function draw_area(ctx, d1, d2, tile, color) {
 
 
 function draw_area2(ctx, d1, d2, tile, dt, act, color) {
-    //console.log(dt);
 
-
-    //console.log(d1,d2,tile)
-    let bin_num = tile.tile.length;
-    let color_scale = d3.scale.linear().domain([0, 1500]).range([0, 0.1]);
     if (dt[0] != undefined) {
 
         if (d1 === tile.dim[0]) {
-            //console.log("Forward")
-            //console.log(dt[0], dt[1])
-            // row is d1, col is d2
-            //console.log(tile.tile)
+
             tile.tile.map(function (d, i) {
 
 
                 d.map(function (dd, j) {
-                    //console.log("dd", dd, "i", i, tile.dim[0], dt[0][i], "j", j, tile.dim[1],dt[1][j]);
+
                     ctx.beginPath();
 
                     ctx.moveTo(x(d1), y[d1](tile.mark[0][i]));
-                    //console.log(x(d1), y[d1](tile.mark[0][i]))
                     ctx.lineTo(x(d2), y[d2](tile.mark[1][j]));
                     ctx.lineTo(x(d2), y[d2](tile.mark[1][j + 1]));
                     ctx.lineTo(x(d1), y[d1](tile.mark[0][i + 1]));
-
                     ctx.lineTo(x(d1), y[d1](tile.mark[0][i]));
 
-                    //ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (opacity * dense * dd * dt[0][i] * dt[1][j]) + ")";
-
-                    ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (opacity * dense * dd * calc_opacity(d1, d2, dt, act, i, j)/*dt[0][i] * dt[1][j]*/) + ")";
-
+                    ctx.fillStyle = (color != undefined) ? (color + (dense * dd / 5) + ")") : "rgba(0,100,160," + (opacity * dense * dd * calc_opacity(d1, d2, dt, act, i, j)) + ")";
 
                     ctx.fill();
                 })
@@ -327,28 +299,20 @@ function draw_area2(ctx, d1, d2, tile, dt, act, color) {
         }
 
         else {
-            // row is d2, col is d1
-            console.log("Reverse")
+
             tile.tile.map(function (d, i) {
-                //console.log("d = ", d);
-                console.log(tile)
+
                 d.map(function (dd, j) {
-                    console.log("dd", dd, "i", i, tile.dim[1], "j", j, tile.dim[0]);
 
                     ctx.beginPath();
 
                     ctx.moveTo(x(d1), y[d1](tile.mark[1][j]));
-                    //console.log(x(d1), y[d1](tile.mark[0][i]))
                     ctx.lineTo(x(d2), y[d2](tile.mark[0][i]));
                     ctx.lineTo(x(d2), y[d2](tile.mark[0][i + 1]));
                     ctx.lineTo(x(d1), y[d1](tile.mark[1][j + 1]));
-
                     ctx.lineTo(x(d1), y[d1](tile.mark[1][j]));
 
-                    //let alpha = 2*tile.tile[i][j];
-                    //let fill = "rgba(0,100,160," + (opacity * dense * dd * dt[0][j] * dt[1][i]) + ")";
-                    //ctx.fillStyle = fill;
-                    ctx.fillStyle = "rgba(0,100,160," + (opacity * dense * dd * calc_opacity(d1, d2, dt, act, j, i)/*dt[0][j] * dt[1][i]*/) + ")";
+                    ctx.fillStyle = "rgba(0,100,160," + (opacity * dense * dd * calc_opacity(d1, d2, dt, act, j, i)) + ")";
                     ctx.fill();
                 })
 
@@ -378,20 +342,18 @@ function calc_density(select_range, cur_block) {
 
 function calc_densetile(active_sel, dense_t, tiles) {
 
-
     for (let item in dense_t) {
         dense_t[item] = compute_dist(tiles, active_sel, item);
 
     }
-
-    console.log("dt ", dense_t)
-
 }
 
 function compute_dist(tiles, active_sel, dim) {
     //let out;
-    let cur_tile;
-    let cur_dist
+    let cur_tile,
+        cur_dist,
+        cd1,
+        cd2;
     if (active_sel.hasOwnProperty(dim)) {
 
         cur_dist = active_sel[dim];
@@ -416,56 +378,43 @@ function compute_dist(tiles, active_sel, dim) {
         for (let active_dim in active_sel) {
 
             if (tiles.hasOwnProperty(active_dim + '/' + dim)) {
-                console.log("row")
+
                 cur_tile = tiles[active_dim + '/' + dim].tile;
 
-                cur_dist = cur_tile.map(r => r.reduce((a, b, i) => {
-                    //console.log("b", b, "i", i, active_sel[active_dim][i])
-                    return (a + active_sel[active_dim][i] * b)/(a+b)
-                }),0);
+                cd1 = cur_tile.map((d, i) => d.reduce((a, b, j) => a + cur_tile[j][i] * active_sel[active_dim][j], 0))
+                cd2 = cur_tile.map((d, i) => d.reduce((a, b, j) => a + cur_tile[j][i], 0))
 
-                /*
-                cur_dist = cur_tile.reduce((a, b) => {
-
-                    return a.map((x, i) => x + active_sel[active_dim][i] * b[i])
-
-                })
-                */
-
+                cur_dist = cd1.map((x, i) => x / (cd2[i] + Number.EPSILON))
             }
             else if (tiles.hasOwnProperty(dim + '/' + active_dim)) {
-                console.log("col")
+
                 cur_tile = tiles[dim + '/' + active_dim].tile;
 
-                cur_dist = cur_tile.map(r => r.reduce((a, b, i) => {
+                cd1 = cur_tile.map(r => r.reduce((a, b, i) => {
 
-                    return (a + active_sel[active_dim][i] * b)/(a+b)
-                }));
-
-
+                    return (a + active_sel[active_dim][i] * b)
+                }, 0));
+                cd2 = cur_tile.map(r => r.reduce((a, b, i) => {
+                    return (a + b)
+                }, 0));
+                cur_dist = cd1.map((x, i) => x / (cd2[i] + Number.EPSILON))
             }
-
-
         }
-
     }
-
     return cur_dist;
 }
 
 function calc_opacity(d1, d2, dt, act, d1_ind, d2_ind) {
     if (Object.keys(act).includes(d1) && (!Object.keys(act).includes(d2))) {
         return dt[0][d1_ind] * dt[1][d2_ind];
-
     }
-
     else if (Object.keys(act).includes(d2) && (!Object.keys(act).includes(d1))) {
 
         return dt[0][d1_ind] * dt[1][d2_ind];
     }
     else if ((!Object.keys(act).includes(d2)) && (!Object.keys(act).includes(d1))) {
 
-        return Math.sqrt(dt[0][d1_ind] * dt[1][d2_ind]);
+        return dt[0][d1_ind] * dt[1][d2_ind];
     }
     else {  // Both dims are brushed
         return dt[0][d1_ind] * dt[1][d2_ind];
