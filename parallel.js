@@ -85,14 +85,14 @@ d3.json("multi_tiles_50.json", function (data) {
             dense = d3.select('#opacity').node().value;
 
         })
-
+        /*
         d3.select('#select_opacity').on('change', () => {
             opacity = d3.select('#select_opacity').node().value;
 
         })
-
+        */
         d3.select('#back_opacity').on('change', () => {
-            back_opacty = d3.select('#back_opacity').node().value;
+            back_opacty = d3.select('#back_opacity').node().value/10;
 
         })
 
