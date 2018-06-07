@@ -318,7 +318,6 @@ function draw_area2(ctx, d1, d2, tile, dt, act, color) {
 
             })
 
-
         }
     }
 
@@ -363,10 +362,8 @@ function compute_dist(tiles, active_sel, dim) {
             if (active_dim != dim) {
                 if (tiles.hasOwnProperty(active_dim + '/' + dim)) {
 
-
                 }
                 else if (tiles.hasOwnProperty(dim + '/' + active_dim)) {
-
 
                 }
             }
